@@ -1,0 +1,19 @@
+
+# Credenciales y archivos privados
+.env
+.env.*
+!.env.example
+credentials/
+firebase-service-account.json
+application-local.properties
+
+# Java y Maven
+target/
+*.class
+
+# Visual Studio Code
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
