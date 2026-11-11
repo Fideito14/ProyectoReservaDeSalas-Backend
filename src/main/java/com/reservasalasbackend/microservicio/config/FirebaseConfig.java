@@ -1,4 +1,3 @@
-
 package com.reservasalasbackend.microservicio.config;
 
 import com.google.auth.oauth2.GoogleCredentials;

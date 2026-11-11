@@ -1,11 +1,13 @@
-
 # Credenciales y archivos privados
 .env
 .env.*
 !.env.example
 credentials/
 firebase-service-account.json
+*-service-account.json
+*service-account*.json
 application-local.properties
+google-services.json
 
 # Java y Maven
 target/
