@@ -19,3 +19,6 @@ target/
 # Sistema operativo
 .DS_Store
 Thumbs.db
+
+# Secreto JWT generado localmente
+.jwt-secret
