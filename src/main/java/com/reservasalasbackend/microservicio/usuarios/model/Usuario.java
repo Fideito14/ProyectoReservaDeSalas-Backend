@@ -32,4 +32,7 @@ public class Usuario {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(name = "coordinador_principal", nullable = false)
+    private boolean coordinadorPrincipal = false;
 }

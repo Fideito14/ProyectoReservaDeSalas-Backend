@@ -15,20 +15,18 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PruebaSeguridadController {
 
-    @GetMapping("/prueba-seguridad")
-    public Map<String, Object> probarAutenticacion(
-            Authentication authentication
-    ) {
+        @GetMapping("/prueba-seguridad")
+        public Map<String, Object> probarAutenticacion(
+                        Authentication authentication) {
 
-        List<String> roles = authentication.getAuthorities()
-                .stream()
-                .map(authority -> authority.getAuthority())
-                .toList();
+                List<String> roles = authentication.getAuthorities()
+                                .stream()
+                                .map(authority -> authority.getAuthority())
+                                .toList();
 
-        return Map.of(
-                "mensaje", "Acceso autorizado",
-                "usuario", authentication.getName(),
-                "roles", roles
-        );
-    }
+                return Map.of(
+                                "mensaje", "Acceso autorizado",
+                                "usuario", authentication.getName(),
+                                "roles", roles);
+        }
 }

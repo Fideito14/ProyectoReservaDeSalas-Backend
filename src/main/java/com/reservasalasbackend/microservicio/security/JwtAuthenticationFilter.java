@@ -1,3 +1,4 @@
+
 package com.reservasalasbackend.microservicio.security;
 
 import com.reservasalasbackend.microservicio.usuarios.model.Usuario;
@@ -25,77 +26,66 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
-    private final UsuarioService usuarioService;
+        private final JwtService jwtService;
+        private final UsuarioService usuarioService;
 
-    private static final Set<String> ROLES_VALIDOS = Set.of(
-            "TRABAJADOR_RELATOR",
-            "COORDINADOR_INFRAESTRUCTURA"
-    );
+        private static final Set<String> ROLES_VALIDOS = Set.of(
+                        "TRABAJADOR_RELATOR",
+                        "COORDINADOR_INFRAESTRUCTURA");
 
-    @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain
-    ) throws ServletException, IOException {
+        @Override
+        protected void doFilterInternal(
+                        HttpServletRequest request,
+                        HttpServletResponse response,
+                        FilterChain filterChain) throws ServletException, IOException {
 
-        String authorization = request.getHeader("Authorization");
+                String authorization = request.getHeader("Authorization");
 
-        if (authorization == null ||
-                !authorization.startsWith("Bearer ")) {
+                if (authorization == null || !authorization.startsWith("Bearer ")) {
+                        filterChain.doFilter(request, response);
+                        return;
+                }
 
-            filterChain.doFilter(request, response);
-            return;
+                String token = authorization.substring(7);
+
+                try {
+                        if (!jwtService.validarToken(token)) {
+                                filterChain.doFilter(request, response);
+                                return;
+                        }
+
+                        String correo = jwtService.obtenerCorreo(token);
+
+                        Optional<Usuario> usuarioEncontrado = usuarioService.buscarPorCorreo(correo);
+
+                        if (usuarioEncontrado.isEmpty()) {
+                                filterChain.doFilter(request, response);
+                                return;
+                        }
+
+                        Usuario usuario = usuarioEncontrado.get();
+
+                        if (usuario.getRol() == null ||
+                                        !ROLES_VALIDOS.contains(usuario.getRol())) {
+                                filterChain.doFilter(request, response);
+                                return;
+                        }
+
+                        List<SimpleGrantedAuthority> authorities = List.of(
+                                        new SimpleGrantedAuthority("ROLE_" + usuario.getRol()));
+
+                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                        correo,
+                                        null,
+                                        authorities);
+
+                        SecurityContextHolder.getContext()
+                                        .setAuthentication(authentication);
+
+                } catch (Exception e) {
+                        SecurityContextHolder.clearContext();
+                }
+
+                filterChain.doFilter(request, response);
         }
-
-        String token = authorization.substring(7);
-
-        try {
-            if (!jwtService.validarToken(token)) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            String correo = jwtService.obtenerCorreo(token);
-
-            Optional<Usuario> usuarioEncontrado =
-                    usuarioService.buscarPorCorreo(correo);
-
-            if (usuarioEncontrado.isEmpty()) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            Usuario usuario = usuarioEncontrado.get();
-
-            if (usuario.getRol() == null ||
-                    !ROLES_VALIDOS.contains(usuario.getRol())) {
-
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            List<SimpleGrantedAuthority> authorities = List.of(
-                    new SimpleGrantedAuthority(
-                            "ROLE_" + usuario.getRol()
-                    )
-            );
-
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            correo,
-                            null,
-                            authorities
-                    );
-
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authentication);
-
-        } catch (Exception e) {
-            SecurityContextHolder.clearContext();
-        }
-
-        filterChain.doFilter(request, response);
-    }
 }
