@@ -23,6 +23,19 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
+
+    // Obtener el perfil del usuario autenticado
+    @GetMapping("/me")
+    public ResponseEntity<?> obtenerPerfil(Authentication authentication) {
+
+        return usuarioService.buscarPorCorreo(authentication.getName())
+                .map(usuario -> ResponseEntity.ok(
+                        UsuarioResponse.desdeUsuario(usuario)
+                ))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
     // Listar todos los usuarios
     @GetMapping
     public ResponseEntity<List<UsuarioResponse>> listarUsuarios() {
